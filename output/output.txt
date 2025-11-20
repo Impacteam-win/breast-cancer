@@ -1,0 +1,171 @@
+
+import pandas as pd
+# ============================================================================
+# Create correlation matrix for top features
+df = pd.DataFrame(X, columns=feature_names)
+top_features_idx = importances.argsort()[::-1][:10]
+top_features = [feature_names[i] for i in top_features_idx]
+corr_matrix = df[top_features].corr()
+
+plt.figure(figsize=(10, 8))
+mask = np.triu(np.ones_like(corr_matrix, dtype=bool), k=1)
+sns.heatmap(corr_matrix, mask=mask, annot=True, fmt='.2f', cmap='coolwarm', 
+            center=0, square=True, linewidths=1, cbar_kws={"shrink": 0.8})
+plt.title("Feature Correlation Heatmap (Top 10 Important Features)", fontsize=14, fontweight='bold')
+plt.tight_layout()
+plt.savefig("./05_feature_correlation_heatmap.png", dpi=300, bbox_inches='tight')
+plt.close()
+
+# ============================================================================
+# VISUALIZATION 6: Class Distribution
+# ============================================================================
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+fig.suptitle('Dataset Class Distribution', fontsize=16, fontweight='bold')
+
+# Pie chart
+ax1 = axes[0]
+class_counts = pd.Series(y).value_counts()
+colors_pie = ['#3498db', '#e74c3c']
+wedges, texts, autotexts = ax1.pie(class_counts, labels=target_names, autopct='%1.1f%%',
+                                     colors=colors_pie, startangle=90, textprops={'fontsize': 12})
+for autotext in autotexts:
+    autotext.set_color('white')
+    autotext.set_fontweight('bold')
+ax1.set_title("Overall Distribution", fontweight='bold')
+
+# Bar chart with train/test split
+ax2 = axes[1]
+train_dist = pd.Series(y_train).value_counts()
+test_dist = pd.Series(y_test).value_counts()
+x = np.arange(len(target_names))
+width = 0.35
+bars1 = ax2.bar(x - width/2, train_dist, width, label='Train', color='#2ecc71', edgecolor='black')
+bars2 = ax2.bar(x + width/2, test_dist, width, label='Test', color='#f39c12', edgecolor='black')
+ax2.set_xlabel('Class', fontweight='bold')
+ax2.set_ylabel('Count', fontweight='bold')
+ax2.set_title('Train/Test Split Distribution', fontweight='bold')
+ax2.set_xticks(x)
+ax2.set_xticklabels(target_names)
+ax2.legend()
+ax2.grid(axis='y', alpha=0.3)
+
+# Add value labels on bars
+for bars in [bars1, bars2]:
+    for bar in bars:
+        height = bar.get_height()
+        ax2.text(bar.get_x() + bar.get_width()/2., height,
+                f'{int(height)}', ha='center', va='bottom', fontweight='bold')
+
+plt.tight_layout()
+plt.savefig("./06_class_distribution.png", dpi=300, bbox_inches='tight')
+plt.close()
+
+# ============================================================================
+# Print Classification Reports
+# ============================================================================
+print("\n" + "="*60)
+print("DETAILED CLASSIFICATION REPORTS")
+print("="*60)
+for name, report in classification_reports.items():
+    print(f"\n{name}:")
+    print("-" * 60)
+    print(report)
+
+print("\n" + "="*60)
+print("VISUALIZATIONS SAVED SUCCESSFULLY!")
+print("="*60)
+print("\nGenerated Files:")
+print("  1. 01_model_performance_dashboard.png")
+print("  2. 02_confusion_matrices.png")
+print("  3. 03_roc_curves.png")
+print("  4. 04_feature_importance_decision_tree.png")
+print("  5. 05_feature_correlation_heatmap.png")
+print("  6. 06_class_distribution.png")
+print("="*60)
+
+# Display results dataframe if ace_tools is available
+try:
+    import ace_tools as tools
+    tools.display_dataframe_to_user(name="Model Performance Summary", dataframe=results_df)
+except ImportError:
+    pass
+============================================================
+BREAST CANCER CLASSIFICATION PROJECT
+============================================================
+
+Dataset Shape: (569, 30)
+Number of Features: 30
+Number of Samples: 569
+Target Classes: ['malignant' 'benign']
+Class Distribution:
+1    357
+0    212
+Name: count, dtype: int64
+============================================================
+
+Training Models...
+  - Logistic Regression
+  - Decision Tree
+  - K-Nearest Neighbors
+
+============================================================
+RESULTS
+============================================================
+
+                      Accuracy  F1 Score  CV Mean  CV Std  ROC AUC
+Logistic Regression    0.9860    0.9889   0.9718  0.0120   0.9977
+Decision Tree          0.9371    0.9497   0.9319  0.0156   0.9186
+K-Nearest Neighbors    0.9790    0.9836   0.9624  0.0157   0.9845
+
+============================================================
+DETAILED CLASSIFICATION REPORTS
+============================================================
+
+Logistic Regression:
+------------------------------------------------------------
+              precision    recall  f1-score   support
+
+   malignant       0.98      0.98      0.98        53
+      benign       0.99      0.99      0.99        90
+
+    accuracy                           0.99       143
+   macro avg       0.99      0.99      0.99       143
+weighted avg       0.99      0.99      0.99       143
+
+
+Decision Tree:
+------------------------------------------------------------
+              precision    recall  f1-score   support
+
+   malignant       0.91      0.92      0.92        53
+      benign       0.96      0.94      0.95        90
+
+    accuracy                           0.94       143
+   macro avg       0.93      0.93      0.93       143
+weighted avg       0.94      0.94      0.94       143
+
+
+K-Nearest Neighbors:
+------------------------------------------------------------
+              precision    recall  f1-score   support
+
+   malignant       1.00      0.94      0.97        53
+      benign       0.97      1.00      0.98        90
+
+    accuracy                           0.98       143
+   macro avg       0.98      0.97      0.98       143
+weighted avg       0.98      0.98      0.98       143
+
+
+============================================================
+VISUALIZATIONS SAVED SUCCESSFULLY!
+============================================================
+
+Generated Files:
+  1. 01_model_performance_dashboard.png
+  2. 02_confusion_matrices.png
+  3. 03_roc_curves.png
+  4. 04_feature_importance_decision_tree.png
+  5. 05_feature_correlation_heatmap.png
+  6. 06_class_distribution.png
+============================================================
